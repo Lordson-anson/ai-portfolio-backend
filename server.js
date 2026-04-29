@@ -47,19 +47,27 @@ app.post("/chat", async (req, res) => {
       })
     });
 
-    const data = await response.json();
+   const data = await response.json();
+
+console.log("RAW OPENAI RESPONSE:");
+console.log(JSON.stringify(data, null, 2));
 
     // 🔍 Debug (visible in Render logs)
     console.log("OPENAI RESPONSE:", JSON.stringify(data, null, 2));
 
     // 🧠 Safe response extraction
-    const reply =
-      data.output?.[0]?.content?.[0]?.text ||
-      data.output_text ||
-      "Sorry, I couldn't generate a response.";
+    if (!data.output) {
+  return res.json({
+    reply: "OpenAI did not return output. Check logs."
+  });
+}
 
-    res.json({ reply });
+const reply =
+  data.output?.[0]?.content?.[0]?.text ||
+  data.output_text ||
+  "No valid response format";
 
+res.json({ reply });
   } catch (error) {
     console.log("ERROR:", error);
     res.json({ reply: "Error talking to AI" });
