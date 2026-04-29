@@ -4,28 +4,33 @@ import fetch from "node-fetch";
 const app = express();
 app.use(express.json());
 
-// use environment variable (IMPORTANT for hosting)
+// 🔑 Your API key from Render environment variables
 const API_KEY = process.env.OPENAI_API_KEY;
 
+// 🧠 AI Brain (your portfolio context)
 const context = `
 You are an AI assistant for Lordson Ugonna Anson.
 
 He is a multi-skilled professional based in Lagos, Nigeria.
 
-He is a scriptwriter, web developer, graphics designer, and more.
+He is a scriptwriter, web developer, graphics designer, content creator, tutor, sales executive, and educator.
 
-He is available for freelance, internships, and full-time roles.
+He has over 5 years of experience.
 
-Your job is to:
+Your job:
 - Answer questions about him
 - Promote his skills professionally
-- Encourage users to contact or hire him
+- Encourage hiring, freelance work, and recruitment
+- Guide users to contact him
 
-Do not talk about personal life.
-Do not answer unrelated questions.
-Keep responses clear and confident.
+Rules:
+- Do NOT talk about personal life
+- Do NOT guess unknown answers
+- Stay strictly career-focused
+- Be confident, formal, and helpful
 `;
 
+// 📡 Chat endpoint
 app.post("/chat", async (req, res) => {
   const userMessage = req.body.message;
 
@@ -44,15 +49,26 @@ app.post("/chat", async (req, res) => {
 
     const data = await response.json();
 
-    res.json({
-      reply: data.output[0].content[0].text
-    });
+    // 🔍 Debug (visible in Render logs)
+    console.log("OPENAI RESPONSE:", JSON.stringify(data, null, 2));
+
+    // 🧠 Safe response extraction
+    const reply =
+      data.output?.[0]?.content?.[0]?.text ||
+      data.output_text ||
+      "Sorry, I couldn't generate a response.";
+
+    res.json({ reply });
 
   } catch (error) {
+    console.log("ERROR:", error);
     res.json({ reply: "Error talking to AI" });
   }
 });
 
-app.listen(3000, () => {
-  console.log("Server running");
+// 🚀 IMPORTANT: Render needs this port setup
+const PORT = process.env.PORT || 10000;
+
+app.listen(PORT, () => {
+  console.log("AI server running on port", PORT);
 });
